@@ -30,7 +30,16 @@ import pyzbar.pyzbar as pyzbar # to scan qr code
 import winshell # to implemet empty recycle bin
 from tkinter import *
 from englisttohindi.englisttohindi import EngtoHindi
-import datef 
+# import datef 
+
+from PyQt5 import QtWidgets, QtCore, QtGui 
+from PyQt5.QtCore import QTimer, QTime, QDate, Qt
+from PyQt5.QtGui import QMovie
+from PyQt5.QtCore import *
+from PyQt5.QtGui import * 
+from PyQt5.QtWidgets import *
+from PyQt5.uic import loadUiType
+from best import Ui_MainWindow 
 
 
 # setup
@@ -47,7 +56,7 @@ doing_well = [
     "It's good to know that you are enjoying with me",
 ] 
 great = [ 
-    "Really sir, i am i doing well?",
+    "Really sir, i am i doing well?", 
     "Thank you very much sir",
     "So will you give me a holiday for that?",
 ]
@@ -56,23 +65,27 @@ unhappy = [
     "I am not in the mood to talk" 
     "please me alone sir, i don't to want to talk now"
 ]
-Play_romantic_song_array = [
-"Aaj Se Teri", 
-
- "Tere Mere", 
-
- "Main Tere Kabil Hoon",  
-
- "Enna Sona",  
-
- "Humsafar",  
-
- "Lambiyaan Si Judaiyan",  
-
- "Ban Ja Rani",  
-
- "Nazm Nazm", 
+good_mood = [
+    "I am feeling good sir.",
+    ""
 ]
+# Play_romantic_song_array = [
+# "Aaj Se Teri", 
+
+#  "Tere Mere", 
+
+#  "Main Tere Kabil Hoon",   
+
+#  "Enna Sona",  
+
+#  "Humsafar",  
+
+#  "Lambiyaan Si Judaiyan",  
+
+#  "Ban Ja Rani",  
+
+#  "Nazm Nazm", 
+# ]
 
 
 
@@ -89,17 +102,17 @@ voices = engine.getProperty('voices')
 rate = engine.getProperty('rate') 
 # print(rate) 
 # print(voices[1].id)
-engine.setProperty('voice', voices[0].id) 
+engine.setProperty('voice', voices[0].id)  
 
 
 
 
 def speak(audio):
     engine.say(audio)
-    engine.runAndWait()
+    engine.runAndWait() 
 
 def WishMe():
-    hour = int(datetime.datetime.now().hour)
+    hour = int(datetime.datetime.now().hour) 
     if hour >= 0 and hour < 12:
         speak("Good morning")
     elif hour >= 12 and hour < 18:
@@ -113,30 +126,12 @@ def WishMe():
 
     speak(f"sir, I am {Bot_name}, it's {strTime}  How may i Help You")     
   
-
-def TakeCommand():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        
-        print("Listening...")
-        r.energy_threshold =3500 
-        r.pause_threshold = 1
-        audio = r.listen(source) 
-
-    try:
-        print("Recognizing...")
-        query = r.recognize_google(audio, language='en-in')
-        print(f"User Said: {query}\n") 
-
-    except Exception as e:
-        # print(e)
-        print("Say That again please") 
-        return "Jarvis" 
-    return query 
+ 
 
 
 
 def pdf_reader():
+
     book = open('hack.pdf', 'rb') 
     pdfReader = PyPDF2.PdfFileReader(book) 
     pages = pdfReader.numPages
@@ -145,7 +140,12 @@ def pdf_reader():
     pg = int(input("Please enter the page number :")) 
     page = pdfReader.getPage(pg) 
     text = page.extractText() 
-    speak(text) 
+    speak(text)
+
+
+
+
+
 
 def news():
     pass 
@@ -184,13 +184,13 @@ def CurrentWeather():
         wind_speed = weather_data['wind']['speed'] 
 
         print(f"Current temprature is: {temprature} degree celcius")  
-        print("Current Weather description is :",weather_desc)
+        print("Current Weather description is :",weather_desc) 
         print("Current Humidity is :",humidity)
         print("Current wind speed :",wind_speed) 
         speak(f"Current temprature is: {temprature} degree celcius") 
         speak("Current Weather description is :",weather_desc) 
         speak("Current Humidity is :",humidity)
-        speak("Current wind speed :",wind_speed) 
+        speak("Current wind speed :",wind_speed)  
 
 
 
@@ -198,7 +198,7 @@ def scan():
     i = 0
     cap = cv2.VideoCapture(0) 
     while i<4:
-        _,frame = cap.read() 
+        _,frame = cap.read()   
         decoded = pyzbar.decode(frame) 
         for obj in decoded:
             print(obj.data) 
@@ -212,347 +212,430 @@ def scan():
 
         
 
-    
-if __name__ == "__main__":
-    WishMe()
-    # OnlineClasses()
-    while True:
-        query = TakeCommand().lower()
+class MainThread(QThread):
+    def __int__(self):
+        super(MainThread,self).__init__() 
 
+    def run(self):
+        self.TaskExecution()   
+
+    def TakeCommand(self): 
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+        
+            print("Listening...")
+            r.energy_threshold =3500 
+            r.pause_threshold = 1 
+            audio = r.listen(source) 
+
+        try:
+            print("Recognizing...")
+            query = r.recognize_google(audio, language='en-in')
+            print(f"User Said: {query}\n") 
+
+        except Exception as e:
+            # print(e)
+            print("Say That again please") 
+            return "Jarvis" 
+            return query 
+ 
+    
+    def TaskExecution(self):
+        WishMe() 
+        while True: 
+            self.query = self.TakeCommand()                                             
+
+        
         # logic for executing the query
 
-        if 'wikipedia' in query:
-            speak("searching wikipedia...")
-            query = query.replace("wikipedia", "")
-            results = wikipedia.summary(query, sentences=2) 
-            speak("According to wikipedia")
-            print(results)
-            engine.setProperty('rate',170)  
-            speak(results)  
-            engine.setProperty('rate', 200) 
-
-        elif 'open youtube' in query:
-            webbrowser.open('youtube.com')
-            speak("Opening YouTube")
-
-        elif 'open github' in query:
-            webbrowser.get('chrome %s').open_new_tab('http://www.github.com') 
-            speak("Opening Github")
         
-        elif 'open google' in query:
-            webbrowser.open('google.com')
-            speak("Opening Google")
-        
-        elif 'open stack overflow' in query:
-            webbrowser.open('stackoverflow.com')
-            speak("Opening stackoverflow")
 
-        elif 'play music' in query:
-            music_dir = 'E:\\music'
-            songs = os.listdir(music_dir)
-            # print(songs) 
-            rndom_song = random.choice(songs)
-            speak("Playing Music") 
-            os.startfile(os.path.join(music_dir, rndom_song)) 
+            if "speak something" in self.query: 
+                speak("what to speak sir?")  
+
+            elif 'wikipedia' in self.query:
+                speak("searching wikipedia...")
+                print("searching wikipedia...") 
+                query = query.replace("wikipedia", "") 
+                results = wikipedia.summary(query, sentences=2) 
+                speak("According to wikipedia") 
+                print(results)
+                engine.setProperty('rate',170)  
+                speak(results)  
+                engine.setProperty('rate', 200)  
+
+            elif 'open youtube' in self.query:
+                webbrowser.open('youtube.com') 
+                speak("Opening YouTube")
+
+            elif 'open github' in self.query:
+                webbrowser.get('chrome %s').open_new_tab('http://www.github.com')  
+                speak("Opening Github")
+            
+            elif 'open google' in self.query:
+                webbrowser.open('google.com')
+                speak("Opening Google")
+            
+            elif 'open stack overflow' in self.query:
+                webbrowser.open('stackoverflow.com')
+                speak("Opening stackoverflow") 
+
+            elif 'play music' in self.query:
+                music_dir = 'E:\\music'
+                songs = os.listdir(music_dir)
+                # print(songs) 
+                rndom_song = random.choice(songs)
+                speak("Playing Music") 
+                os.startfile(os.path.join(music_dir, rndom_song)) 
+                
+
+            elif 'the time' in self.query: 
+                now = datetime.datetime.now() 
+                print(f"The current time is {now}")
+                speak(f"The current time is {now}")   
+
+
+            elif 'open code' in self.query: 
+                Codepath = "C:\\Program Files\\Microsoft VS Code\\Code.exe"
+                os.startfile(Codepath)
+                speak("opening Visual Studio Code") 
+            
+            elif 'open notepad' in self.query:
+                Notepad_path = "C:\\Windows\\System32\\notepad.exe"
+                speak("Opening Notepad")
+                os.startfile(Notepad_path)
+
+            elif 'translate english to hindi' in self.query: 
+                speak("Sir, tell the sentence which you want me to translate hindi to english")
+                Sentence = TakeCommand().lower()
+                res = EngtoHindi(Sentence) 
+                print(res.convert)
+                speak(res.convert)
+
+            elif 'write a note' in query or 'write note' in self.query:
+                speak("What should i write sir?")
+                note = TakeCommand()
+                file = open('data.txt', 'w')
+                speak("Sir should i include date and time?")
+                snfm = TakeCommand().lower()
+                if 'yes' in snfm:
+                    strTime = datetime.datetime.now().strftime("%H:%M:%S")  
+                    speak("Okay i have implemented the date and time along with the note")
+                    file.write(strTime) 
+                    file.write(" :- ")
+                    file.write(note)
+                
+                else:
+                    speak("Okay sir, i have written the note without date and time") 
+                    file.write(note) 
+
+            elif 'read note' in query or 'show note' in self.query:
+                speak("Showing notes")
+                file = open('data.txt', 'r')
+                print(file.read())
+                speak(file.read(6)) 
+
+
+
+
+            elif 'open command prompt' in self.query:
+                os.system("start cmd")
+
+            elif 'open snake game' in self.query:
+                gamePath = "E:\\python\\pygame - snake game\\game.py"
+                speak("Opening your snake game")
+                os.startfile(gamePath) 
+
+            # elif 'open camera' in query:
+            #     cap = cv2.VideoCapture(0)
+            #     while True:
+            #         ret, img = cap.read()  
+            #         cv2.imshow('webcam', img) 
+            #         k = cv2.waitKey(50)
+            #         if k==27:
+            #             break
+            #         cap.release()
+            #         cv2.destroyAllWindows()
+
+            elif 'ip address' in self.query:
+                ip = get('https://api.ipify.org').text
+                print(f"Your Ip address is: {ip}")
+                speak(f"Sir, Your ip address is {ip}") 
+
+            elif 'search something on google' in self.query:
+                speak("What should i search on Google")
+                cm = TakeCommand().lower()
+                webbrowser.open(f"{cm}")
+
+                speak(f"Searching for {cm} on google") 
+
+            elif 'send message to me' in self.query:
+                speak("What should i send to your number")
+                whatMsg = TakeCommand().lower() 
+                kit.sendwhatmsg("+918083175586", whatMsg,10,55 ) 
+
+            elif 'who are you' in self.query:
+                speak("Sir as i told, i am Jarvis, your assistant") 
+
+            # elif 'play a song on youtube'  in query: 
+            #     speak("Sir which type of song sir")
+            #     songType = TakeCommand().lower() 
+            #     if 'romantic' in songType:
+            #         Play_romantic_song() 
+            #     elif 'dj' in songType:
+            #         play_dj_song()  
+            #     elif 'classic' in songType:
+            #         play_classic_song()
+            #     elif 'english' in songType:
+            #         play_enlish_song()
+            #     elif 'slow song' in songType:
+            #         play_slow_song() 
+            #     elif 'random' in songType:
+            #         play_random_song() 
+                
+
+            elif 'doing great' in self.query or 'doing well' in self.query:
+                doing_well_random = random.choice(doing_well) 
+                print(doing_well_random) 
+                speak(doing_well_random) 
+
+
+            elif 'not good' in self.query or 'not well' in self.query or 'very bad' in self.query:
+                unhappy_random = random.choice(unhappy)
+                print(unhappy_random)
+                speak(unhappy_random) 
+
+            elif 'great' in self.query:
+                great_random = random.choice(great)
+                print(great_random)
+                speak(great_random) 
+
             
 
-        elif 'the time' in query: 
-            now = datetime.datetime.now() 
-            print(f"The current time is {now}")
-            speak(f"The current time is {now}") 
+            elif 'tell me a joke' in self.query:
+                joke = pyjokes.get_joke(language="en")  
+                speak(joke) 
 
+            # my online classes
 
-        elif 'open code' in query: 
-            Codepath = "C:\\Program Files\\Microsoft VS Code\\Code.exe"
-            os.startfile(Codepath)
-            speak("opening Visual Studio Code") 
-        
-        elif 'open notepad' in query:
-            Notepad_path = "C:\\Windows\\System32\\notepad.exe"
-            speak("Opening Notepad")
-            os.startfile(Notepad_path)
+            # elif 'set alarm' in query:
+            #     speak("Sir, for which time you would like to set") 
+            #     Alarm_time = (input("Enter the time for wwhich you want to set alarm: ")) 
+            #     datef.alarm(Alarm_time) 
+            #     speak(f"Sir, the alarm has been set for {hourA} : {minuteA}")  
+                
 
-        elif 'translate english to hindi' in query: 
-            speak("Sir, tell the sentence which you want me to translate hindi to english")
-            Sentence = TakeCommand().lower()
-            res = EngtoHindi(Sentence) 
-            print(res.convert)
-            speak(res.convert)
+            elif 'shutdown the system' in self.query:
+                speak("Shutting off the system")
+                os.system("shutdown /s /t 5") 
+                
+            elif 'restart the system' in self.query:
+                speak("restarting off the system")
+                os.system("shutdown /r /t 5")
 
-        elif 'write a note' in query or 'write note' in query:
-            speak("What should i write sir?")
-            note = TakeCommand()
-            file = open('data.txt', 'w')
-            speak("Sir should i include date and time?")
-            snfm = TakeCommand().lower()
-            if 'yes' in snfm:
-                strTime = datetime.datetime.now().strftime("%H:%M:%S")  
-                speak("Okay i have implemented the date and time along with the note")
-                file.write(strTime) 
-                file.write(" :- ")
-                file.write(note)
+            elif 'quit' in self.query or 'kuwait' in self.query: 
+                print("Thanks for using me sir, have a good day")
+                speak("Thanks for using me sir, have a good day") 
+                sys.exit()
+
+            elif 'where i am' in self.query or 'where we are' in self.query:
+                speak("wait sir, let me check")
+                try:
+                    url = 'https://get.geojs.io/v1/ip/geo/' + ip + '.json'
+                    geo_requests = requests.get(url)
+                    geo_data = geo_requests.json()
+
+                    city = geo_data['city']
+                    state = geo_data['state']
+                    country = geo_data['country'] 
+
+                    speak(f"sir i am not sure but i think we are in {city} city of {state}")
+                
+                except Exception as e:
+                    print(e) 
+                    print("Sorry sir i was not able to find our location due network issue") 
+                    speak("Sorry sir i was not able to find our location due network issue")
+
+            # elif 'our location' in query:
+            #     speak("wait sir let me check")
+
+            #     send_url = 'http://freegeoip.net/json'
+            #     r = requests.get(send_url)
+            #     j = json.loads(r.text)
+            #     lat = j['latitude']
+            #     lon = j['longitude']
+
+            #     speak(f"Sir your latitude is {lat}")
+            #     speak(f"Sir your latitude is {lon}") 
+
+            elif 'notification' in self.query:
+                notification.notify(
+                    title = "Welcome to jarvis",
+                    message = "Sir, you have made me thank you, i am jarvis",
+                    app_icon = None,
+                    timeout = 10, 
+                ) 
             
+            elif 'take screenshot' in self.query or 'take a screenshot' in self.query:
+                speak("Hold the screen for few seconds, i am taking screenshot")
+                ScreenShot_name = TakeCommand().lower()
+                # time.sleep(3)
+                ScreenShot = pyautogui.screenshot()
+                img.save(f"{ScreenShot_name}.png")
+                speak("i am done sir, the image is saved in our main folder") 
+
+            elif 'weather' in self.query:
+                speak("Let me check sir") 
+                try:
+                    res = app.query(query) 
+                    print(next(res.results).text) 
+                    speak(next(res.results).text) 
+                
+                except Exception as e:
+                    print(e) 
+
+            elif 'read pdf' in self.query:
+                pdf_reader()
+
+            elif 'say that again please' in self.query:
+                speak("i was not able to understand that") 
+
+            elif 'battery status' in self.query or 'battery' in self.query:  
+                cpu = str(psutil.cpu_percent()) 
+                print(f"sir you have using {cpu} of your compuetr's cpu")
+                speak(f"sir you have using {cpu} of your compuetr's cpu")  
+
+                battery_left = psutil.sensors_battery().percent
+                print(f"Sir your are left with {battery_left}")
+                speak(f"Sir your are left with {battery_left}") 
+
+            elif 'please' in self.query: 
+                speak("Sir tell me anything but don't tell please, i am your assistant") 
+
+            elif 'jarvis give your introduction to my friends' in query or 'give your introduction' in query:
+                speak(f"Hello, i am {Bot_name}, I am a genral porpuse bot made by Ashutosh, I am still In devlopment, i can do many things like sending messages on whatsapp, i search wikipedia,and do many more things like playing songs, checking social media messages setting alarm and timer,Telling the news, i can also feed you with the latest weather reports") 
+                
+                
+                
+
+            elif 'my location' in self.query or 'our location' in self.query: 
+                ch_number = phonenumbers.parse("+918083175586","CH")  
+                geocoder.description_for_number(ch_number, "en-in") 
+
+            elif 'timer' in self.query: 
+                speak("for how much seconds Sir")
+                TimeToSet = int(input("For how much seconds Sir: ")) 
+                for i in  range(TimeToSet):
+                    print(str(TimeToSet - 1) + " seconds remaining") 
+                    time.sleep(1) 
+
+            elif 'switch the window' in self.query: 
+                pyautogui.keyDown("alt")
+                pyautogui.press("tab")
+                time.sleep(1)
+                pyautogui.keyUp("alt") 
+
+            elif 'empty recycle bin' in self.query: 
+                speak("Are you sure sir you want to empty the recycle bin") 
+                confirm = TakeCommand().lower() 
+                if 'yes' in query:
+                    winshell.recycle_bin().empty(confirm=False, show_progress=False, sound=True)
+                    speak("Recycle Bin Recycled") 
+
+                else:
+                    print("Okay sir")   
+                    speak("Okay sir")         
+
+            elif 'scan qr code' in self.query:
+                speak("opening camera sir!")  
+                scan() 
+
+            elif 'news' in self.query:
+                speak("Sir wait for a while, i am feteching the latest news") 
+                news() 
+
+            elif 'weather' in self.query:
+                CurrentWeather()   
+
+            elif 'thank you jarvis' in self.query:
+                print("It's my pleasure sir")
+                speak("It's my pleasure sir") 
+
+            
+                
+
+
+            elif 'doing well' in self.query:
+                pass 
+    
+
+            # else:
+            #     if '' in query:
+            #         speak("Can you repeat it sir?")
+            #         print("Can you repeat it sir?") 
+
             else:
-                speak("Okay sir, i have written the note without date and time") 
-                file.write(note) 
+                temp = query.replace(' ','+')  
+                g_url = "https://www.google.com/search?q="
+                res_g = "Sorry sir, i can't understant the query you have but let me search it on Google"
+                print(res_g)
+                speak(res_g)  
+                webbrowser.open_new_tab(g_url+temp)  
 
-        elif 'read note' in query or 'show note' in query:
-            speak("Showing notes")
-            file = open('data.txt', 'r')
-            print(file.read())
-            speak(file.read(6)) 
+         
 
-
-
-
-        elif 'open command prompt' in query:
-            os.system("start cmd")
-
-        elif 'open snake game' in query:
-            gamePath = "E:\\python\\pygame - snake game\\game.py"
-            speak("Opening your snake game")
-            os.startfile(gamePath) 
-
-        # elif 'open camera' in query:
-        #     cap = cv2.VideoCapture(0)
-        #     while True:
-        #         ret, img = cap.read()
-        #         cv2.imshow('webcam', img) 
-        #         k = cv2.waitKey(50)
-        #         if k==27:
-        #             break
-        #         cap.release()
-        #         cv2.destroyAllWindows()
-
-        elif 'ip address' in query:
-            ip = get('https://api.ipify.org').text
-            print(f"Your Ip address is: {ip}")
-            speak(f"Sir, Your ip address is {ip}") 
-
-        elif 'search something on google' in query:
-            speak("What should i search on Google")
-            cm = TakeCommand().lower()
-            webbrowser.open(f"{cm}")
-
-            speak(f"Searching for {cm} on google") 
-
-        elif 'send message to me' in query:
-            speak("What should i send to your number")
-            whatMsg = TakeCommand().lower() 
-            kit.sendwhatmsg("+918083175586", whatMsg,10,55 ) 
-
-        elif 'who are you' in query:
-            speak("Sir as i told, i am Jarvis, your assistant") 
-
-        elif 'play a song on youtube'  in query: 
-            speak("Sir which type of song sir")
-            songType = TakeCommand().lower() 
-            if 'romantic' in songType:
-                Play_romantic_song() 
-            elif 'dj' in songType:
-                play_dj_song() 
-            elif 'classic' in songType:
-                play_classic_song()
-            elif 'english' in songType:
-                play_enlish_song()
-            elif 'slow song' in songType:
-                play_slow_song() 
-            elif 'random' in songType:
-                play_random_song() 
-             
-
-        elif 'doing great' in query or 'doing well' in query:
-            doing_well_random = random.choice(doing_well) 
-            print(doing_well_random) 
-            speak(doing_well_random) 
+        speak("Sir, do you have any other queries ?")  
 
 
-        elif 'not good' in query or 'not well' in query or 'very bad' in query:
-            unhappy_random = random.choice(unhappy)
-            print(unhappy_random)
-            speak(unhappy_random) 
+startExecution = MainThread() 
 
-        elif 'great' in query:
-            great_random = random.choice(great)
-            print(great_random)
-            speak(great_random) 
-
-        
-
-        elif 'tell me a joke' in query:
-            joke = pyjokes.get_joke(language="en")  
-            speak(joke) 
-
-        # my online classes
-
-        elif 'set alarm' in query:
-            speak("Sir, for which time you would like to set") 
-            Alarm_time = (input("Enter the time for wwhich you want to set alarm: ")) 
-            datef.alarm(Alarm_time) 
-            speak(f"Sir, the alarm has been set for {hourA} : {minuteA}") 
-            
-
-        elif 'shutdown the system' in query:
-            speak("Shutting off the system")
-            os.system("shutdown /s /t 5") 
-            
-        elif 'restart the system' in query:
-            speak("restarting off the system")
-            os.system("shutdown /r /t 5")
-
-        elif 'quit' in query or 'kuwait' in query: 
-            print("Thanks for using me sir, have a good day")
-            speak("Thanks for using me sir, have a good day") 
-            sys.exit()
-
-        elif 'where i am' in query or 'where we are' in query:
-            speak("wait sir, let me check")
-            try:
-                url = 'https://get.geojs.io/v1/ip/geo/' + ip + '.json'
-                geo_requests = requests.get(url)
-                geo_data = geo_requests.json()
-
-                city = geo_data['city']
-                state = geo_data['state']
-                country = geo_data['country'] 
-
-                speak(f"sir i am not sure but i think we are in {city} city of {state}")
-            
-            except Exception as e:
-                print(e) 
-                print("Sorry sir i was not able to find our location due network issue") 
-                speak("Sorry sir i was not able to find our location due network issue")
-
-        # elif 'our location' in query:
-        #     speak("wait sir let me check")
-
-        #     send_url = 'http://freegeoip.net/json'
-        #     r = requests.get(send_url)
-        #     j = json.loads(r.text)
-        #     lat = j['latitude']
-        #     lon = j['longitude']
-
-        #     speak(f"Sir your latitude is {lat}")
-        #     speak(f"Sir your latitude is {lon}") 
-
-        elif 'notification' in query:
-            notification.notify(
-                title = "Welcome to jarvis",
-                message = "Sir, you have made me thank you, i am jarvis",
-                app_icon = None,
-                timeout = 10, 
-            ) 
-        
-        elif 'take screenshot' in query or 'take a screenshot' in query:
-            speak("Hold the screen for few seconds, i am taking screenshot")
-            ScreenShot_name = TakeCommand().lower()
-            # time.sleep(3)
-            ScreenShot = pyautogui.screenshot()
-            img.save(f"{ScreenShot_name}.png")
-            speak("i am done sir, the image is saved in our main folder") 
-
-        elif 'weather' in query:
-            speak("Let me check sir") 
-            try:
-                res = app.query(query) 
-                print(next(res.results).text) 
-                speak(next(res.results).text) 
-            
-            except Exception as e:
-                print(e) 
-
-        elif 'read pdf' in query:
-            pdf_reader()
-
-        elif 'say that again please' in query:
-            speak("i was not able to understand that") 
-
-        elif 'battery status' in query or 'battery' in query: 
-            cpu = str(psutil.cpu_percent()) 
-            print(f"sir you have using {cpu} of your compuetr's cpu")
-            speak(f"sir you have using {cpu} of your compuetr's cpu")  
-
-            battery_left = psutil.sensors_battery().percent
-            print(f"Sir your are left with {battery_left}")
-            speak(f"Sir your are left with {battery_left}") 
-
-        elif 'please' in query:
-            speak("Sir tell me anything but don't tell please, i am your assistant") 
-
-        elif 'jarvis give your introduction to my friends' in query or 'give your introduction' in query:
-            speak(f"Hello, i am {Bot_name}, I am a genral porpuse bot made by Ashutosh, I am still In devlopment, i can do many things like sending messages on whatsapp, i search wikipedia,and do many more things like playing songs, checking social media messages setting alarm and timer,Telling the news, i can also feed you with the latest weather reports") 
-             
-            
-              
-
-        elif 'my location' in query or 'our location' in query:
-            ch_number = phonenumbers.parse("+918083175586","CH")  
-            geocoder.description_for_number(ch_number, "en-in") 
-
-        elif 'timer' in query:
-            speak("for how much seconds Sir")
-            TimeToSet = int(input("For how much seconds Sir: ")) 
-            for i in  range(TimeToSet):
-                print(str(TimeToSet - 1) + " seconds remaining") 
-                time.sleep(1) 
-
-        elif 'switch the window' in query:
-            pyautogui.keyDown("alt")
-            pyautogui.press("tab")
-            time.sleep(1)
-            pyautogui.keyUp("alt") 
-
-        elif 'empty recycle bin' in query:
-            speak("Are you sure sir you want to empty the recycle bin") 
-            confirm = TakeCommand().lower() 
-            if 'yes' in query:
-                winshell.recycle_bin().empty(confirm=False, show_progress=False, sound=True)
-                speak("Recycle Bin Recycled") 
-
-            else:
-                print("Okay sir")   
-                speak("Okay sir")         
-
-        elif 'scan qr code' in query:
-            speak("opening camera sir!")  
-            scan() 
-
-        elif 'news' in query:
-            speak("Sir wait for a while, i am feteching the latest news") 
-            news() 
-
-        elif 'weather' in query:
-            CurrentWeather()   
-
-        elif 'thank you jarvis' in query:
-            print("It's my pleasure sir")
-            speak("It's my pleasure sir") 
-
-        
-             
-
-
-        elif 'doing well' in query:
-            pass 
+class Main(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.pushButton.clicked.connect(self.startTask)
+        self.ui.pushButton_2.clicked.connect(self.close)  
  
+    def startTask(self):
+        # label - 1
+        self.ui.movie = QtGui.QMovie("E:\python\project 1 - jarvis\jarvis gui\jarvis gui files\iron_man_2.gif") 
+        self.ui.label.setMovie(self.ui.movie) 
+        self.ui.movie.start()
+        # label - 2
+        self.ui.movie = QtGui.QMovie("E:\python\project 1 - jarvis\jarvis gui\jarvis gui files\initilize.gif")   
+        self.ui.label_2.setMovie(self.ui.movie) 
+        self.ui.movie.start() 
+        # label -3
+        self.ui.movie = QtGui.QMovie("E:\python\project 1 - jarvis\jarvis gui\jarvis gui files\scifi)bar.gif")   
+        self.ui.label_3.setMovie(self.ui.movie) 
+        self.ui.movie.start() 
+        # label - 4
+        self.ui.movie = QtGui.QMovie("E:\python\project 1 - jarvis\jarvis gui\jarvis gui files\android_gif.gif")    
+        self.ui.label_4.setMovie(self.ui.movie)  
+        self.ui.movie.start() 
+        # timer
+        timer = QTimer(self)
+        timer.timeout.connect(self.showTime)
+        timer.start(1000)
+        startExecution.start()
+        # speak("started sir")   
 
-        # else:
-        #     if '' in query:
-        #         speak("Can you repeat it sir?")
-        #         print("Can you repeat it sir?") 
+    def showTime(self):
+        current_time = QTime.currentTime()
+        current_date = QDate.currentDate()
+        label_time = current_time.toString('hh:mm:ss')
+        label_date = current_date.toString(Qt.ISODate) 
+        
 
-        else:
-            temp = query.replace(' ','+')  
-            g_url = "https://www.google.com/search?q="
-            res_g = "Sorry sir, i can't understant the query you have but let me search it on Google"
-            print(res_g)
-            speak(res_g)  
-            webbrowser.open_new_tab(g_url+temp)  
-
-        speak("Sir, do you have any other queries ?") 
+app = QApplication(sys.argv) 
+jarvis = Main()
+jarvis.show()
+exit(app.exec_())  
 
         
 
+     
         
             
 
@@ -563,7 +646,7 @@ if __name__ == "__main__":
         
 
 
-    # speak("Sir, do you have any other work") 
+  
 
 
         
